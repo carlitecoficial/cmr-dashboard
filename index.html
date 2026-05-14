@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root{--bg:#0e0e10;--bg2:#17171a;--bg3:#1f1f23;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0f0f0;--text2:#888;--text3:#555;--accent:#7c6fef;--accent2:#5dcaa5;--danger:#e24b4a;--radius:12px;--radius-sm:8px;}
+:root{--bg:#0e0e10;--bg2:#17171a;--bg3:#1f1f23;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0f0f0;--text2:#888;--text3:#555;--accent:#22c55e;--accent2:#5dcaa5;--danger:#e24b4a;--radius:12px;--radius-sm:8px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 header{padding:28px 32px 20px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);margin-bottom:24px;}
@@ -45,7 +45,7 @@ main{padding:0 32px 40px;}
 .cat-name{font-size:12px;flex:1;}
 .cat-bar-wrap{width:80px;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
 .cat-bar{height:100%;border-radius:2px;transition:width 0.5s ease;}
-.cat-amount{font-family:'DM Mono',monospace;font-size:12px;min-width:70px;text-align:right;}
+.cat-amount{font-family:'DM Mono',monospace;font-size:11px;min-width:88px;text-align:right;}
 .cat-pct{font-size:11px;color:var(--text3);min-width:28px;text-align:right;}
 .tx-list{max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
 .tx-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
@@ -75,19 +75,18 @@ main{padding:0 32px 40px;}
 <div class="month-scroll"><div class="month-track" id="month-track"></div></div>
 <main>
   <div class="metrics" id="metrics"></div>
-  <div class="card" style="margin-bottom:14px;"><div class="card-title">Evolución del gasto total</div><div style="position:relative;height:160px;"><canvas id="evolChart"></canvas></div></div>
+  <div class="card" style="margin-bottom:14px;"><div class="card-title">Evolución del gasto total</div><div style="position:relative;height:180px;"><canvas id="evolChart"></canvas></div></div>
   <div class="card" style="margin-bottom:14px;">
-    <div class="card-title" id="resumen-toggle" onclick="toggleResumen()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Resumen histórico por categoría<span id="resumen-chevron" style="font-size:14px;color:var(--text3);transition:transform 0.2s;">▶</span></div>
+    <div class="card-title" id="resumen-toggle" onclick="toggleResumen()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;"><span>Resumen histórico por categoría <span id="resumen-total-label" style="color:var(--text3);font-weight:400;font-size:10px;"></span></span><span id="resumen-chevron" style="font-size:14px;color:var(--text3);transition:transform 0.2s;">▶</span></div>
     <div id="resumen-total" style="display:none;"></div>
   </div>
   <div class="grid2">
     <div class="card"><div class="card-title">Por categoría</div><div id="cat-list"></div></div>
     <div class="card"><div class="card-title">Distribución</div><div style="position:relative;height:190px;"><canvas id="pieChart"></canvas></div><div class="pie-legend" id="pie-legend"></div></div>
   </div>
-  <div class="card" style="margin-bottom:14px;"><div class="card-title">Tendencia mensual</div><div style="position:relative;height:150px;"><canvas id="trendChart"></canvas></div></div>
   <div class="card" style="margin-bottom:14px;"><div class="card-title">Suscripciones y gastos fijos detectados</div><div id="subs-list"></div></div>
   <div class="card"><div class="card-title">Transacciones</div><div class="tx-filters" id="tx-filters"></div><div class="tx-list" id="tx-list"></div></div>
-  <div class="updated">Última actualización: 14/05/2026 09:48</div>
+  <div class="updated">Última actualización: 14/05/2026 09:53</div>
 </main>
 <script>
 const CATS={'Farmacia':'#5DCAA5','Delivery':'#378ADD','Combustible':'#EF9F27','Streaming':'#7F77DD','Salud':'#D4537E','Comida':'#D85A30','Mercado':'#888780','Salidas':'#639922','Auto/Moto':'#E24B4A','Trabajo':'#4986e7','Mondo':'#B4B2A9','Moto/Viaje':'#BA7517','Inversión':'#AFA9EC','Transporte':'#26C6DA','Compras':'#FF7043','Deporte':'#9CCC65','Otros':'#444441'};
@@ -95,7 +94,7 @@ const ALL_DATA={"Mar 2026": {"month": "Mar 2026", "total_facturado": 1047740, "t
 const MONTHS=["Ene 2025", "Feb 2025", "Mar 2025", "Abr 2025", "May 2025", "Jun 2025", "Jul 2025", "Ago 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dic 2025", "Ene 2026", "Feb 2026", "Mar 2026"];
 const TOTALS=[1600548, 1686773, 1065082, 1988362, 1962925, 2859176, 2821570, 2303841, 1462803, 2184756, 2595481, 1526505, 869480, 1717284, 2179224];
 const AVG=TOTALS.length?Math.round(TOTALS.reduce((a,b)=>a+b,0)/TOTALS.length):0;
-let currentMonth=MONTHS[MONTHS.length-1],activeCat='Todas',pieInst=null,trendInst=null;
+let currentMonth=MONTHS[MONTHS.length-1],activeCat='Todas',pieInst=null;
 function fmt(n){return '$'+Math.round(n).toLocaleString('es-CL');}
 function fmtK(n){return n>=1000000?'$'+(Math.round(n/100000)/10)+'M':'$'+Math.round(n/1000)+'K';}
 function getCatTotals(month){const t={};(ALL_DATA[month]?.transacciones||[]).forEach(tx=>{if(tx.categoria==='Inversión')return;t[tx.categoria]=(t[tx.categoria]||0)+tx.monto;});return t;}
@@ -106,6 +105,7 @@ function render(month){
   const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]),total=grand;
   const diff=total-AVG,diffPct=Math.abs(Math.round(diff/AVG*100));
   document.querySelectorAll('.mbtn').forEach(b=>b.classList.toggle('active',b.dataset.m===month));
+  setTimeout(()=>document.querySelector('.mbtn.active')?.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50);
   document.getElementById('period-badge').textContent=month;
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Total gastado</div><div class="metric-value">${fmt(total)}</div><div class="metric-sub">${txs.length} transacciones</div></div>
@@ -115,22 +115,19 @@ function render(month){
   const max=sorted[0]?sorted[0][1]:1;
   document.getElementById('cat-list').innerHTML=sorted.filter(([,v])=>v>0).map(([cat,amt])=>{
     const pct=Math.round(amt/grand*100),c=CATS[cat]||'#555';
-    return `<div class="cat-row" onclick="filterCat('${cat}')"><span class="cat-dot" style="background:${c}"></span><span class="cat-name">${cat}</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(amt/max*100)}%;background:${c}"></div></div><span class="cat-amount">${fmtK(amt)}</span><span class="cat-pct">${pct}%</span></div>`;
+    return `<div class="cat-row" onclick="filterCat('${cat}')"><span class="cat-dot" style="background:${c}"></span><span class="cat-name">${cat}</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(amt/max*100)}%;background:${c}"></div></div><span class="cat-amount">${fmt(amt)}</span><span class="cat-pct">${pct}%</span></div>`;
   }).join('');
   const pieCats=sorted.filter(([,v])=>v>0).map(([c])=>c),pieVals=pieCats.map(c=>totals[c]),pieColors=pieCats.map(c=>CATS[c]||'#555');
   if(pieInst)pieInst.destroy();
   pieInst=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:pieCats,datasets:[{data:pieVals,backgroundColor:pieColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${fmtK(ctx.raw)} (${Math.round(ctx.raw/grand*100)}%)`}}}}});
   document.getElementById('pie-legend').innerHTML=pieCats.map((cat,i)=>`<span><i style="background:${pieColors[i]}"></i>${cat}</span>`).join('');
-  const from=Math.max(0,idx-5),tLabels=MONTHS.slice(from,idx+1),tData=tLabels.map(m=>Object.values(getCatTotals(m)).reduce((a,b)=>a+b,0)),tColors=tLabels.map(m=>m===month?'#7c6fef':'rgba(124,111,239,0.25)');
-  if(trendInst)trendInst.destroy();
-  trendInst=new Chart(document.getElementById('trendChart'),{type:'bar',data:{labels:tLabels,datasets:[{data:tData,backgroundColor:tColors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtK(ctx.raw)}}},scales:{x:{ticks:{color:'#555',font:{size:10,family:'DM Mono'}},grid:{display:false},border:{display:false}},y:{ticks:{color:'#555',font:{size:10,family:'DM Mono'},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
   const allCats=['Todas',...Object.keys(CATS).filter(c=>totals[c]>0)];
-  document.getElementById('tx-filters').innerHTML=allCats.map(c=>{const col=c==='Todas'?'#7c6fef':(CATS[c]||'#888');return `<button class="fcat-btn${c==='Todas'?' active':''}" style="border-color:${col};${c==='Todas'?'color:white;background:'+col+';':''}" onclick="filterCat('${c}')">${c}</button>`;}).join('');
+  document.getElementById('tx-filters').innerHTML=allCats.map(c=>{const col=c==='Todas'?'#22c55e':(CATS[c]||'#888');return `<button class="fcat-btn${c==='Todas'?' active':''}" style="border-color:${col};${c==='Todas'?'color:white;background:'+col+';':''}" onclick="filterCat('${c}')">${c}</button>`;}).join('');
   renderTxs();
 }
 function filterCat(cat){
   activeCat=cat;
-  document.querySelectorAll('.fcat-btn').forEach(b=>{const a=b.textContent===cat,col=cat==='Todas'?'#7c6fef':(CATS[cat]||'#888');b.classList.toggle('active',a);b.style.background=a?col:'transparent';b.style.color=a?'white':'';b.style.borderColor=a?col:'rgba(255,255,255,0.12)';});
+  document.querySelectorAll('.fcat-btn').forEach(b=>{const a=b.textContent===cat,col=cat==='Todas'?'#22c55e':(CATS[cat]||'#888');b.classList.toggle('active',a);b.style.background=a?col:'transparent';b.style.color=a?'white':'';b.style.borderColor=a?col:'rgba(255,255,255,0.12)';});
   renderTxs();
 }
 function renderTxs(){
@@ -198,6 +195,8 @@ function renderResumenTotal(){
   const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
   const grand=Object.values(totals).reduce((a,b)=>a+b,0);
   const max=sorted[0]?sorted[0][1]:1;
+  const lbl=document.getElementById('resumen-total-label');
+  if(lbl)lbl.textContent='· '+fmt(grand)+' total';
   document.getElementById('resumen-total').innerHTML=sorted.filter(([,v])=>v>0).map(([cat,amt])=>{
     const pct=Math.round(amt/grand*100),c=CATS[cat]||'#555';
     return `<div class="cat-row"><span class="cat-dot" style="background:${c}"></span><span class="cat-name">${cat}</span><div class="cat-bar-wrap" style="width:100px"><div class="cat-bar" style="width:${Math.round(amt/max*100)}%;background:${c}"></div></div><span class="cat-amount">${fmt(amt)}</span><span class="cat-pct">${pct}%</span></div>`;
@@ -208,7 +207,7 @@ function renderEvolucion(){
   const labels=MONTHS;
   const valores=MONTHS.map(m=>Object.values(getCatTotals(m)).reduce((a,b)=>a+b,0));
   if(evolInst)evolInst.destroy();
-  evolInst=new Chart(document.getElementById('evolChart'),{type:'line',data:{labels,datasets:[{data:valores,borderColor:'#7c6fef',backgroundColor:'rgba(124,111,239,0.07)',borderWidth:2,pointBackgroundColor:'#7c6fef',pointRadius:4,tension:0.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtK(ctx.raw)}}},scales:{x:{ticks:{color:'#555',font:{size:9,family:'DM Mono'}},grid:{display:false},border:{display:false}},y:{ticks:{color:'#555',font:{size:9,family:'DM Mono'},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
+  evolInst=new Chart(document.getElementById('evolChart'),{type:'line',data:{labels,datasets:[{data:valores,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.07)',borderWidth:2,pointBackgroundColor:'#22c55e',pointRadius:4,tension:0.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length)render(MONTHS[els[0].index]);},onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},scales:{x:{ticks:{color:'#555',font:{size:9,family:'DM Mono'}},grid:{display:false},border:{display:false}},y:{ticks:{color:'#555',font:{size:9,family:'DM Mono'},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
 }
 const track=document.getElementById('month-track');
 MONTHS.forEach(m=>{const btn=document.createElement('button');btn.className='mbtn';btn.dataset.m=m;btn.textContent=m;btn.onclick=()=>render(m);track.appendChild(btn);});
