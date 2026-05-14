@@ -76,7 +76,10 @@ main{padding:0 32px 40px;}
 <main>
   <div class="metrics" id="metrics"></div>
   <div class="card" style="margin-bottom:14px;"><div class="card-title">Evolución del gasto total</div><div style="position:relative;height:160px;"><canvas id="evolChart"></canvas></div></div>
-  <div class="card" style="margin-bottom:14px;"><div class="card-title">Resumen histórico por categoría</div><div id="resumen-total"></div></div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title" id="resumen-toggle" onclick="toggleResumen()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Resumen histórico por categoría<span id="resumen-chevron" style="font-size:14px;color:var(--text3);transition:transform 0.2s;">▶</span></div>
+    <div id="resumen-total" style="display:none;"></div>
+  </div>
   <div class="grid2">
     <div class="card"><div class="card-title">Por categoría</div><div id="cat-list"></div></div>
     <div class="card"><div class="card-title">Distribución</div><div style="position:relative;height:190px;"><canvas id="pieChart"></canvas></div><div class="pie-legend" id="pie-legend"></div></div>
@@ -84,7 +87,7 @@ main{padding:0 32px 40px;}
   <div class="card" style="margin-bottom:14px;"><div class="card-title">Tendencia mensual</div><div style="position:relative;height:150px;"><canvas id="trendChart"></canvas></div></div>
   <div class="card" style="margin-bottom:14px;"><div class="card-title">Suscripciones y gastos fijos detectados</div><div id="subs-list"></div></div>
   <div class="card"><div class="card-title">Transacciones</div><div class="tx-filters" id="tx-filters"></div><div class="tx-list" id="tx-list"></div></div>
-  <div class="updated">Última actualización: 14/05/2026 09:45</div>
+  <div class="updated">Última actualización: 14/05/2026 09:48</div>
 </main>
 <script>
 const CATS={'Farmacia':'#5DCAA5','Delivery':'#378ADD','Combustible':'#EF9F27','Streaming':'#7F77DD','Salud':'#D4537E','Comida':'#D85A30','Mercado':'#888780','Salidas':'#639922','Auto/Moto':'#E24B4A','Trabajo':'#4986e7','Mondo':'#B4B2A9','Moto/Viaje':'#BA7517','Inversión':'#AFA9EC','Transporte':'#26C6DA','Compras':'#FF7043','Deporte':'#9CCC65','Otros':'#444441'};
@@ -181,6 +184,14 @@ function renderSubs(){
     return `<div class="tx-row"><span class="tx-desc" style="font-size:12px">${s.desc}</span><span class="tx-pill" style="background:${c}22;color:${c}">${s.cat}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:50px;text-align:right">${s.count}m</span><span class="tx-amount" style="color:${c}">${fmt(s.avg)}</span></div>`;
   }).join('');
 }
+function toggleResumen(){
+  const el=document.getElementById('resumen-total');
+  const ch=document.getElementById('resumen-chevron');
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  ch.style.transform=open?'rotate(90deg)':'rotate(0deg)';
+  if(open&&!el.innerHTML)renderResumenTotal();
+}
 function renderResumenTotal(){
   const totals={};
   MONTHS.forEach(m=>{(ALL_DATA[m]?.transacciones||[]).forEach(tx=>{if(tx.categoria==='Inversión')return;totals[tx.categoria]=(totals[tx.categoria]||0)+tx.monto;});});
@@ -202,7 +213,7 @@ function renderEvolucion(){
 const track=document.getElementById('month-track');
 MONTHS.forEach(m=>{const btn=document.createElement('button');btn.className='mbtn';btn.dataset.m=m;btn.textContent=m;btn.onclick=()=>render(m);track.appendChild(btn);});
 (function applyRc(){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('rc:'))continue;const p=k.split(':');if(p.length<3)continue;const m=p[1],idx=+p[2],tx=ALL_DATA[m]?.transacciones?.[idx];if(tx)tx.categoria=localStorage.getItem(k);}})();
-if(MONTHS.length){render(MONTHS[MONTHS.length-1]);renderSubs();renderEvolucion();renderResumenTotal();}
+if(MONTHS.length){render(MONTHS[MONTHS.length-1]);renderSubs();renderEvolucion();}
 </script>
 </body>
 </html>
